@@ -5,24 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quantum Predictor v6</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/Awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        /* أنيميشن النبض الفيروزي الإجباري */
+        @keyframes radar-pulse-forced {
+            0% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7) !important; }
+            70% { transform: scale(1.1); opacity: 0.3; box-shadow: 0 0 0 30px rgba(0, 255, 255, 0) !important; }
+            100% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 0 0 rgba(0, 255, 255, 0) !important; }
+        }
+
+        .pulse-circle-forced {
+            animation: radar-pulse-forced 2s infinite !important;
+        }
+
         .hidden { display: none !important; }
-        
-        /* أنيميشن النبض الفيروزي */
-        @keyframes radar-pulse {
-            0% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7); }
-            70% { transform: scale(1.1); opacity: 0.3; box-shadow: 0 0 0 30px rgba(0, 255, 255, 0); }
-            100% { transform: scale(0.9); opacity: 0.8; box-shadow: 0 0 0 0 rgba(0, 255, 255, 0); }
-        }
 
-        .pulse-circle {
-            animation: radar-pulse 2s infinite;
-        }
-
-        /* ستايل خانة اللقب لضمان الظهور */
+        /* ستايل خانة اللقب لضمان الظهور بالسيف */
         #sec_ans {
             display: block !important;
             width: 90% !important;
@@ -38,15 +37,15 @@
         }
     </style>
 </head>
-<body class="bg-black text-white overflow-hidden">
+<body style="background-color: #000 !important; color: #fff !important; overflow: hidden !important;">
 
-    <section id="auth-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-black">
-        <h1 class="text-3xl font-black italic mb-6">QUANTUM<span class="text-blue-600">NODE</span></h1>
-        <div class="w-full max-w-sm space-y-4 text-center">
-            <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد" class="w-full p-4 bg-zinc-900 rounded-xl text-center border border-white/10 outline-none">
-            <input type="password" id="u_pas" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900 rounded-xl text-center border border-white/10 outline-none">
-            <button onclick="processAuth()" id="sync-btn" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase transition-transform active:scale-95">Start Sync</button>
-            <p id="status-text" class="text-xs text-zinc-500 mt-4"></p>
+    <section id="auth-screen" style="position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background-color: #000;">
+        <h1 style="font-size: 30px; font-weight: 900; font-style: italic; margin-bottom: 24px;">QUANTUM<span style="color: #2563eb;">NODE</span></h1>
+        <div style="width: 100%; max-width: 350px; text-align: center;">
+            <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد" style="width: 100%; padding: 16px; background: #1a1a1a; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: center; margin-bottom: 12px; color: #fff; outline: none;">
+            <input type="password" id="u_pas" placeholder="كلمة المرور" style="width: 100%; padding: 16px; background: #1a1a1a; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: center; margin-bottom: 12px; color: #fff; outline: none;">
+            <button onclick="processAuth()" id="sync-btn" style="width: 100%; padding: 16px; background-color: #2563eb; color: #fff; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; text-transform: uppercase; transition: transform 0.1s;">Start Sync</button>
+            <p id="status-text" style="font-size: 11px; color: #555; margin-top: 16px;"></p>
         </div>
     </section>
 
@@ -62,15 +61,18 @@
         </div>
     </section>
 
-    <section id="main-app" class="hidden fixed inset-0 bg-black flex flex-col items-center justify-center">
-        <div class="relative flex flex-col items-center">
-            <div class="pulse-circle absolute w-64 h-64 border-2 border-cyan-500 rounded-full opacity-20"></div>
+    <section id="main-app" class="hidden" style="position: fixed; inset: 0; z-index: 40; display: none; flex-direction: column; align-items: center; justify-content: center; background-color: #000 !important;">
+        <div style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             
-            <div id="target-mult" class="relative text-7xl font-black text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.8)] italic">1.00x</div>
-            <p class="text-cyan-400 font-bold mt-6 tracking-widest text-xs uppercase">Quantum Signal Active</p>
+            <div class="pulse-circle-forced" style="position: absolute; width: 250px; height: 250px; border: 3px solid #00ffff !important; background: rgba(0,255,255,0.05) !important; rounded-radius: 50% !important; border-radius: 50% !important;"></div>
             
-            <button onclick="getSignal()" class="mt-16 px-14 py-4 bg-cyan-500 text-black font-black rounded-full shadow-[0_0_20px_rgba(0,255,255,0.4)] transition-all active:scale-90 uppercase italic">
-                Get Signal
+            <div id="target-mult" style="position: relative; font-size: 70px !important; font-weight: 900 !important; font-style: italic !important; color: #ffffff !important; text-shadow: 0 0 25px #00ffff !important; margin-bottom: 10px !important;">1.00x</div>
+            
+            <p style="color: #00ffff !important; font-weight: bold !important; margin-top: 10px !important; tracking-widest: text-xs uppercase; font-size: 12px !important; text-transform: uppercase !important; text-shadow: 0 0 10px #00ffff !important;">Quantum Signal Active</p>
+            
+            <button onclick="getSignal()" 
+                style="margin-top: 60px !important; padding: 18px 60px !important; background-color: #00ffff !important; color: #000000 !important; font-weight: 900 !important; border-radius: 50px !important; border: none !important; text-transform: uppercase !important; font-style: italic !important; box-shadow: 0 0 25px rgba(0,255,255,0.5) !important; transition: transform 0.1s !important;">
+                Get New Signal
             </button>
         </div>
     </section>
