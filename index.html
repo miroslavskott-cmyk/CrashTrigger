@@ -1,95 +1,136 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Veto Vision Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #050505; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        .hidden { display: none !important; }
-        
-        /* الدائرة الزرقاء المضيئة */
-        .signal-circle {
-            width: 280px; height: 280px;
-            border: 8px solid #ffffff;
-            border-radius: 50%;
-            background: radial-gradient(circle, #1e69ff 0%, #0044cc 100%);
-            box-shadow: 0 0 50px rgba(30, 105, 255, 0.6);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veto Vision Pro</title>
 
-        /* أنيميشن النبض */
-        .pulse-border {
-            position: absolute; width: 320px; height: 320px;
-            border: 1px solid rgba(30, 105, 255, 0.3);
-            border-radius: 50%; animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0% { transform: scale(0.9); opacity: 1; } 100% { transform: scale(1.2); opacity: 0; } }
+<script src="https://cdn.tailwindcss.com"></script>
 
-        .vip-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-    </style>
+<style>
+body { background:#050505; color:white; font-family:Arial; overflow:hidden; }
+.hidden { display:none !important; }
+
+.signal-circle {
+    width:280px;height:280px;
+    border:8px solid #fff;
+    border-radius:50%;
+    background: radial-gradient(circle,#1e69ff,#0044cc);
+    box-shadow:0 0 50px rgba(30,105,255,.6);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+
+.pulse-border {
+    position:absolute;width:320px;height:320px;
+    border:1px solid rgba(30,105,255,.3);
+    border-radius:50%;
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {transform:scale(.9);opacity:1;}
+    100% {transform:scale(1.2);opacity:0;}
+}
+
+.vip-card {
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:20px;
+}
+</style>
 </head>
+
 <body>
 
-    <section id="auth-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black p-6">
-        <h1 class="text-3xl font-black italic mb-8">QUANTUM<span class="text-blue-500">NODE</span></h1>
-        <div class="w-full max-w-xs space-y-4">
-            <input type="text" id="u_log" placeholder="رقم الهاتف أو البريد" class="w-full p-4 bg-zinc-900 rounded-xl text-center border border-white/5 outline-none">
-            <input type="password" id="u_pas" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900 rounded-xl text-center border border-white/5 outline-none">
-            <button onclick="processAuth()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase active:scale-95 transition-all">Start Real-Time Sync</button>
-        </div>
-    </section>
+<!-- LOGIN -->
+<section id="auth-screen" class="fixed inset-0 flex flex-col items-center justify-center bg-black p-6">
+<h1 class="text-3xl font-black italic mb-8">QUANTUM<span class="text-blue-500">NODE</span></h1>
 
-    <section id="security-layer" class="hidden fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black p-6">
-        <div class="text-center space-y-6">
-            <div class="w-20 h-20 border-2 border-red-600 rounded-full flex items-center justify-center mx-auto bg-red-600/10">
-                <span class="text-red-600 text-4xl">⚠️</span>
-            </div>
-            <h2 class="text-2xl font-black uppercase">Security Lock</h2>
-            <p class="text-red-500 font-bold text-sm">أدخل اللقب أو الإجابة السرية لتأكيد هويتك</p>
-            <input type="text" id="sec_ans" placeholder="Answer here..." class="w-full p-4 bg-white text-black font-bold rounded-xl text-center border-4 border-red-600 outline-none">
-            <button onclick="finalVerify()" class="w-full py-4 bg-white text-black font-black rounded-xl uppercase">Confirm & Unlock</button>
-        </div>
-    </section>
+<div class="w-full max-w-xs space-y-4">
+<input id="u_log" placeholder="رقم الهاتف أو البريد" class="w-full p-4 bg-zinc-900 rounded-xl text-center">
+<input id="u_pas" type="password" placeholder="كلمة المرور" class="w-full p-4 bg-zinc-900 rounded-xl text-center">
+<button onclick="processAuth()" class="w-full py-4 bg-blue-600 rounded-xl font-bold">Start</button>
+</div>
+</section>
 
-    <section id="main-app" class="hidden fixed inset-0 flex flex-col items-center p-4">
-        <div class="w-full flex justify-between items-center px-4 mt-4">
-            <span class="bg-zinc-900/50 text-[10px] text-cyan-400 p-2 rounded-lg font-bold">LIVE TRAFFIC: 4.8k</span>
-            <span class="text-[10px] font-black italic">AVIATOR VETO VISION <span class="text-cyan-400">●</span></span>
-        </div>
+<!-- SECURITY -->
+<section id="security-layer" class="hidden fixed inset-0 flex flex-col items-center justify-center bg-black p-6">
+<h2 class="text-xl mb-4">تأكيد الهوية</h2>
+<input id="sec_ans" placeholder="الجواب السري" class="p-4 text-black rounded">
+<button onclick="finalVerify()" class="mt-4 bg-white text-black px-6 py-2 rounded">تأكيد</button>
+</section>
 
-        <div class="flex-1 flex flex-col items-center justify-center relative">
-            <div class="pulse-border"></div>
-            <div class="signal-circle">
-                <div id="target-mult" class="text-6xl font-black italic text-white">1.00x</div>
-                <div class="text-[10px] font-bold tracking-[3px] mt-2 opacity-80">NEXT HIT</div>
-            </div>
-            <h2 class="text-2xl font-black italic mt-12 uppercase tracking-widest">Veto Vision Pro</h2>
-            <div class="flex gap-4 mt-2">
-                <span class="text-[10px] font-bold">STATUS: <span class="text-green-500">OPTIMIZED</span></span>
-                <span class="text-[10px] font-bold">ACCURACY: <span class="text-yellow-500">60% FREE</span></span>
-            </div>
-        </div>
+<!-- APP -->
+<section id="main-app" class="hidden fixed inset-0 flex flex-col items-center">
 
-        <div class="w-full max-w-sm vip-card p-6 mb-8 relative overflow-hidden">
-            <div class="absolute top-4 left-4 bg-cyan-500 text-black text-[10px] font-black px-2 py-1 rounded">Lifetime $2</div>
-            <div class="text-right">
-                <h3 class="text-cyan-400 font-black text-sm italic">VIP ACTIVATION (96%) 🔥</h3>
-                <p class="text-[9px] text-zinc-400 mt-2">استعادة 10% من رصيدك يومياً (Daily Cashback)</p>
-                <p class="text-[9px] text-zinc-400">دقة إشارات تفوق 96% مع دعم كافة المنصات</p>
-            </div>
-            <div class="mt-4 flex items-center justify-between bg-black/40 p-3 rounded-lg">
-                <button class="text-[10px] font-bold bg-zinc-700 px-3 py-1 rounded">COPY</button>
-                <span class="text-[8px] text-zinc-500 font-mono">TYXbsFZK3HYq3LX1uwX113Ukrm44ib9XDr</span>
-            </div>
-        </div>
+<div class="flex-1 flex flex-col items-center justify-center relative">
+<div class="pulse-border"></div>
 
-        <button onclick="getSignal()" class="w-full max-w-sm py-5 bg-cyan-500 text-black font-black rounded-3xl text-xl italic uppercase mb-6 shadow-[0_10px_30px_rgba(6,182,212,0.3)]">
-            Get Signal
-        </button>
-    </section>
+<div class="signal-circle">
+<div id="target-mult" class="text-5xl font-bold">1.00x</div>
+<div class="text-xs mt-2">NEXT HIT</div>
+</div>
+</div>
 
-    <script src="script.js"></script>
+<button onclick="getSignal()" class="mb-10 bg-cyan-500 text-black px-8 py-4 rounded-xl font-bold">
+Get Signal
+</button>
+
+</section>
+
+<script>
+// بيانات بسيطة (محاكاة فقط)
+const USER = {
+    login: "admin",
+    pass: "1234",
+    secret: "veto"
+};
+
+// تسجيل الدخول
+function processAuth(){
+    let u = document.getElementById("u_log").value.trim();
+    let p = document.getElementById("u_pas").value.trim();
+
+    if(!u || !p){
+        alert("املأ جميع الحقول");
+        return;
+    }
+
+    if(u === USER.login && p === USER.pass){
+        document.getElementById("auth-screen").classList.add("hidden");
+        document.getElementById("security-layer").classList.remove("hidden");
+    } else {
+        alert("بيانات خاطئة");
+    }
+}
+
+// التحقق النهائي
+function finalVerify(){
+    let ans = document.getElementById("sec_ans").value.trim();
+
+    if(ans.toLowerCase() === USER.secret){
+        document.getElementById("security-layer").classList.add("hidden");
+        document.getElementById("main-app").classList.remove("hidden");
+    } else {
+        alert("إجابة خاطئة");
+    }
+}
+
+// توليد إشارة
+function getSignal(){
+    let el = document.getElementById("target-mult");
+
+    let value = (Math.random() * 5 + 1).toFixed(2);
+
+    el.innerText = value + "x";
+
+    // تأثير
+    el.style.transform = "scale(1.3)";
+    setTimeout(()=>{
+        el.style.transform = "scale(1)";
+    },300);
+}
+</script>
+
 </body>
 </html>
